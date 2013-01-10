@@ -4,18 +4,19 @@ var SERVER_PORT=12085;
 //TODO: 
 // https://github.com/imaya/CanvasTool.PngEncoder/blob/master/src/CanvasTool/pngencoder.js
 // https://github.com/blueimp/JavaScript-Canvas-to-Blob
-//http://stackoverflow.com/questions/4554252/typed-arrays-in-gecko-2-float32array-concatenation-and-expansion
-//https://github.com/schteppe/js-bson 
-// also https://github.com/muhmi/javascript-bson
 function ClientSocket(serverURL)
 {
 	var self = this;
 	self.socket = null;
 	self.url = serverURL;
+	self.connected = false;
 
 	self.init = function() {
 
 		return self;
+	}
+	self.disconnect = function() {
+		self.socket.close();
 	}
 	self.sendMsg = function(cmd, args) {
 		console.log('Send: '+JSON.stringify({'cmd': cmd, 'args':args}));
@@ -26,6 +27,7 @@ function ClientSocket(serverURL)
 			self.socket.send(encodedMsg);
 		}
 	}
+
 	self.connectToServer = function() {
 		console.log('Connecting to '+self.url+'...');
 		self.socket = new WebSocket(self.url);
@@ -34,8 +36,10 @@ function ClientSocket(serverURL)
 		
 		self.socket.onopen = function(event) {
 			console.log("connected!");
+			self.connected = true;
 			//TODO: clear canvas
-			$('#connect-button').hide();
+			$('#connect-button').button('reset');
+			$('#connect-button').html('Logout');
 
 			self.socket.send('TCMP');
 
@@ -58,14 +62,14 @@ function ClientSocket(serverURL)
 		
 		self.socket.onclose = function(event) {
 			console.log('Connection closed');
-			var code = event.code;
-			var reason = event.reason;
-			var wasClean = event.wasClean;
 			// handle close event
-			$('#connect-button').show();
 			$('#connect-button').button('reset');
-			bootbox.alert("<strong>Connection is closed.</strong>", function() {
-			});
+			if(self.connected)
+			{
+				self.connected = false;
+				bootbox.alert("<strong>Connection is closed.</strong>", function() {
+				});
+			}
 		};
 		
 		self.socket.onerror = function(event) {
@@ -80,6 +84,7 @@ function ClientSocket(serverURL)
 	}
 	function failedToConnect()
 	{
+		self.connected = false;
 		$('#connect-button').button('reset');
 		bootbox.alert("<strong>Error</strong> Failed to connect to server.", function() {
 		});
@@ -101,7 +106,7 @@ function Canvas(drawingCanvas) {
 		this.canvas.addEventListener('mouseup',   ev_canvas, false);
 		return this;
 	}
-	function toolPencel() {
+	this.toolPencil = new function() {
 		var tool = this;
 		this.started = false;
 		// This is called when you start holding down the mouse button.
@@ -122,20 +127,16 @@ function Canvas(drawingCanvas) {
 		// This is called when you release the mouse button.
 		this.mouseup = function (ev) {
 			if (tool.started) {
-					tool.mousemove(ev);
-					tool.started = false;
+				tool.mousemove(ev);
+				context.closePath();
+				tool.started = false;
 			}
 		}
 	}
-	this.tool = toolPencel;
+	this.tool = this.toolPencil;
 	function ev_canvas (ev) {
-		if (ev.layerX || ev.layerX == 0) { // Firefox
-				ev._x = ev.layerX;
-				ev._y = ev.layerY;
-		} else if (ev.offsetX || ev.offsetX == 0) { // Opera
-				ev._x = ev.offsetX;
-				ev._y = ev.offsetY;
-		}
+		ev._x = ev.pageX-self.canvas.offsetLeft;
+		ev._y = ev.pageY-self.canvas.offsetTop;
 		var func = self.tool[ev.type];
 		if (func) {
 				func(ev);
@@ -150,16 +151,25 @@ $(function(){
 	canvas = new Canvas($("#drawingCanvas")[0]).init();
 
 	$(document).on("click", "#connect-button", function(e) {
-		bootbox.prompt('Server address', function(result) {
-			  if (result === null) {
-			  } else {
-			  	if(result.length == 0)
-			  		result = 'localhost';
-				socket = new ClientSocket('ws://'+result+':'+SERVER_PORT);
-				socket.connectToServer();
-				$('#connect-button').button('loading');
-			  }
-		})
+		if(socket.connected)
+	  	{
+	  		socket.disconnect();
+	  	}
+	  	else
+	  	{
+			var serverAddr = localStorage.serverAddress || '';
+			bootbox.prompt('Server address', 'Cancel', 'OK', function(result) {
+				if (result === null) {
+				} else {
+					localStorage.serverAddress = result;
+					if(result.length == 0)
+						result = 'localhost';
+					socket = new ClientSocket('ws://'+result+':'+SERVER_PORT);
+					socket.connectToServer();
+					$('#connect-button').button('loading');
+				}
+			}, serverAddr);
+	  	}
 	});
 
 	$('#test-button').click(function(){
