@@ -96,10 +96,10 @@ function ClientSocket(serverURL)
 function Canvas(drawingCanvas) {
 	var self = this;
 	this.canvas = drawingCanvas;
-	var context = null;
+	this.context = null;
 
 	this.init = function(){
-		context = this.canvas.getContext('2d'),
+		this.context = this.canvas.getContext('2d'),
 		// Attach the mousedown, mousemove and mouseup event listeners.
 		this.canvas.addEventListener('mousedown', ev_canvas, false);
 		this.canvas.addEventListener('mousemove', ev_canvas, false);
@@ -112,15 +112,15 @@ function Canvas(drawingCanvas) {
 		// This is called when you start holding down the mouse button.
 		// This starts the pencil drawing.
 		this.mousedown = function (ev) {
-			context.beginPath();
-			context.moveTo(ev._x, ev._y);
+			self.context.beginPath();
+			self.context.moveTo(ev._x, ev._y);
 			tool.started = true;
 		};
 
 		this.mousemove = function (ev) {
 			if (tool.started) {
-				context.lineTo(ev._x, ev._y);
-				context.stroke();
+				self.context.lineTo(ev._x, ev._y);
+				self.context.stroke();
 			}
 		}
 
@@ -128,7 +128,6 @@ function Canvas(drawingCanvas) {
 		this.mouseup = function (ev) {
 			if (tool.started) {
 				tool.mousemove(ev);
-				context.closePath();
 				tool.started = false;
 			}
 		}

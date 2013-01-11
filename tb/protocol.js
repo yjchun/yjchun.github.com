@@ -60,14 +60,76 @@ function pencode(cmd, arg)
 	return buffer;
 }
 
-var handler = {
+var handler = new function(){
+	var self = this;
+	var connectionId;
 
-	init: function() {
+	this.init = function() {
 		socket.sendMsg('protocol-init', 
 			{'protocolName':'TCMP', 'version':1000}
 			)
-	},
-	handleMessage: function(obj){
+	};
+	this.handleMessage= function(obj){
 		console.log(JSON.stringify(obj));
+		onMessage(obj.cmd, obj.args);
+	};
+	function onMessage(cmd, args) {
+		if(cmd == 'protocol-init'){
+		}
+		else if(cmd == 'ping-request')  {
+			socket.sendMsg('ping-response');
+		}
+		else if(cmd == 'connection-init') {
+			self.connectionId = args.connectionId;
+			socket.sendMsg('student-list-request');
+		}
+		else if(cmd=='student-list') {
+			if(args.studentList.length > 0)
+			{
+				socket.sendMsg('student-login', {'studentCode': args.studentList[0].studentCode});
+			}
+		}
+		else if(cmd=='request-thumbnail-image') {
+
+		}
+		else if(cmd=='whiteboard-stroke-add') {
+			drawStroke(args.stroke);
+		}
+		else if(cmd=='whiteboard-snapshot') {
+			
+		}
+		else if(cmd=='whiteboard-set-attr') {
+			args.strokes.map(drawStroke);
+		}
+		else if(cmd=='whiteboard-create') {
+			canvas.context.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
+		}
+		else if(cmd=='whiteboard-destroy') {
+			canvas.context.clearRect(0, 0, canvas.canvas.width, canvas.canvas.height);
+		}
+		else
+		{
+			console.log('unknown command: '+cmd);
+		}
+	}
+	function drawStroke(stroke)
+	{
+		if(stroke.points.length == 0)
+			return;
+		canvas.context.beginPath();
+		var pPoint = stroke.points[0];
+		var point = pPoint;
+		canvas.context.moveTo(stroke.points[0].x, stroke.points[0].y);
+		for(var i=1;i<stroke.points.length;i++)
+		{
+			var point = stroke.points[i];
+			var midPoint={};
+			midPoint.x = (point.x+pPoint.x)/2.0;
+			midPoint.y = (point.y+pPoint.y)/2.0;
+			canvas.context.quadraticCurveTo(pPoint.x, pPoint.y, point.x, point.y);
+			pPoint = point;
+		}
+		canvas.context.moveTo(point.x, point.y);
+		canvas.context.stroke();
 	}
 }
