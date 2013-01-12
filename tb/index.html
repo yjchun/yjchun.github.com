@@ -2,33 +2,32 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/css/bootstrap.css">
+    <link rel="stylesheet" href="whiteboard.css">
 
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height">
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/css/bootstrap-responsive.css" rel="stylesheet">
 </head>
 <body>
 
- <div class="container">
+ <div class="container1">
     <h1>TabletClassWeb - for network testing</h1>
     <hr />
     <div class="page"></div>
   </div>
 
- <div class="container">
+ <div class="container1">
     <button class="btn btn-primary" type="button" data-loading-text="Connecting.." id='connect-button'>Connect</button>
    </div>
     <button class="btn" type="button" id='test-button'>Test</button>
 
-    <p>
-
-    <div class="container" id='whiteboard-div'>
-    <canvas id="drawingCanvas" width="1024" height="768"
-        style="border:1px solid #000000;">
+    <div class="container1" id='whiteboard-div'>
+    <canvas id="drawingCanvas" width="768" height="768">
     </div>
 
-    <p>
-      <footer>
-        <p>&copy; 2013 Venturebridge Co,.</p>
-      </footer>
+        <div class="footer">
+        <p><center>&copy; 2013 Venturebridge Co,. All rights reserved.</center></p>
+        </div>
 
 	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
 	<script src="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.2.2/bootstrap.min.js"></script>

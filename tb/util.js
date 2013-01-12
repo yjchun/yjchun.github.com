@@ -8,3 +8,22 @@ function swap32(val) {
 function swap321(val) {
 	return val;
 }
+
+function setCanvas(){
+
+   var canvasNode = document.getElementById('drawingCanvas');
+
+   var pw = canvasNode.parentNode.clientWidth;
+   var ph = canvasNode.parentNode.clientHeight;
+
+   // canvasNode.height = pw * 0.8 * (canvasNode.height/canvasNode.width);  
+   // canvasNode.height = ph*0.8
+   // canvasNode.width = pw * 0.8;
+   // canvasNode.style.top = (ph-canvasNode.height)/2 + "px";
+   // canvasNode.style.left = (pw-canvasNode.width)/2 + "px";
+
+//    canvasNode.style.position = "fixed";
+
+}
+
+window.onload = window.onresize = setCanvas;
